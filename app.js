@@ -22,7 +22,7 @@ app.get('/:filename.html', function(req, res) {
     sendHtmlData(filename, res)
 });
 
-app.use(express.static('./app'));
+app.use(express.static(conf.APP_FOLDER));
 
 
 var server = app.listen(3000, function() {
