@@ -1,13 +1,16 @@
 var express = require('express');
 var app = express();
 var router = express.Router();
-var updateIncludes = require('./updateIncludes')();
+var util = require('./util')();
 var conf = require('./conf')()
+
+util.glob(conf.API_JS_FILE, function(data) {
+});
 
 
 function sendHtmlData(filename, res) {
 	filename = conf.APP_FOLDER + "/" + filename
-    updateIncludes.glob(filename, function(data) {
+    util.glob(filename, function(data) {
         res.send(data);
     });
 }

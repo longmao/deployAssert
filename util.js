@@ -13,7 +13,7 @@ module.exports = function () {
     //
     var _reInc = /(^\s*<!--\s*\#include\s*file=["']([^"']+)["']\s*(.+)?\s*-->\s*$)/gm;
     var _reInc_virtual = /(^\s*<!--\s*\#include\s*virtual=["']([^"']+)["']\s*(.+)?\s*-->\s*$)/gm;
-
+    var _reAPIHOST = /app_api_host\s*=\s["']([^"']+)["']/m;
     // $1 = prop name
     // $2 = value
     var _reProp = /([-_\w]+)\s*=\s*["']([^"']+)["']/g;
@@ -27,14 +27,24 @@ module.exports = function () {
             files.forEach(function(filePath){
                 _fs.readFile(filePath, FILE_ENCODING, function(err, data){
                     if (err) throw err;
-                    callback && callback(renderData(data))
+                    if(filename.match(/main.js/ig)){
+                        _fs.writeFileSync(filename,replaceAPIHOST(data));
+                    }else{
+                        callback && callback(renderData(data))
+                    }
                 });
             });
 
         });
     }
 
-
+    function replaceAPIHOST(data){
+        var _data= ""
+        data = data.replace(_reAPIHOST, function(match, includeStart, fileName){
+            return "app_api_host = '" + conf.API_HOST + "'"
+        });
+        return data;
+    }
     function replaceProcess (data,regexp){
         var _data= ""
         data = data.replace(regexp, function(match, includeStart, fileName){
