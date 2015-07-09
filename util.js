@@ -3,7 +3,7 @@ module.exports = function () {
     var _fs = require('fs');
     var FILE_ENCODING = 'utf-8';
     var conf = require('./conf')()
-
+    var exists = _fs.exists || require('path').exists;
     // ---
     // $1 = include start
     // $2 = file name
@@ -20,22 +20,32 @@ module.exports = function () {
 
     // mustache-like syntax
     var _reStache = /\{\{([-_\w]+)\}\}/g;
-
+    function errorHandler(errorName,res){
+        switch(errorName){
+            case "notFound":
+                res.send("notFound")
+                break;
+        }
+    }
     function glob(filename,callback){
-        _glob(filename, function(err, files){
-            if (err) throw err;
-            files.forEach(function(filePath){
-                _fs.readFile(filePath, FILE_ENCODING, function(err, data){
-                    if (err) throw err;
-                    if(filename.match(/main.js/ig)){
-                        _fs.writeFileSync(filename,replaceAPIHOST(data));
-                    }else{
-                        callback && callback(renderData(data))
-                    }
+        exists(filename,function(exist){
+            if (!exist) return  callback && callback("notFound")
+            _glob(filename, function(err, files){
+                if (err) throw err;
+                files.forEach(function(filePath){
+                    _fs.readFile(filePath, FILE_ENCODING, function(err, data){
+                        if (err) throw err;
+                        if(filename.match(/main.js/ig)){
+                            _fs.writeFileSync(filename,replaceAPIHOST(data));
+                        }else{
+                            callback && callback(err,renderData(data))
+                        }
+                    });
                 });
-            });
 
-        });
+            });
+        })
+
     }
 
     function replaceAPIHOST(data){
@@ -77,7 +87,7 @@ module.exports = function () {
     }
 
 
-    return {glob:glob}
+    return {glob:glob,errorHandler:errorHandler}
 }
 
 
