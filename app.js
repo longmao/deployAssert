@@ -35,7 +35,7 @@ app.get('/:filename.html', function(req, res) {
 app.use(express.static(conf.APP_FOLDER));
 
 
-var server = app.listen(3000, function() {
+var server = app.listen(process.env.port || 3000, function() {
 
     var host = server.address().address;
     var port = server.address().port;
